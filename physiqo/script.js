@@ -8,6 +8,56 @@ document.getElementById('calBtn').addEventListener('click',()=>{const age=+docum
 
 let step=1;const steps=[...document.querySelectorAll('.form-step')],stepLabel=document.getElementById('stepLabel'),progressBar=document.getElementById('progressBar');function showStep(n){step=n;steps.forEach(s=>s.classList.toggle('active',+s.dataset.step===n));stepLabel.textContent=`Step ${n} of 3`;progressBar.style.width=`${n/3*100}%`}document.querySelectorAll('.next-btn').forEach(btn=>btn.addEventListener('click',()=>{const current=steps.find(s=>+s.dataset.step===step);const req=[...current.querySelectorAll('[required]')];if(req.some(i=>!i.value)){req.find(i=>!i.value)?.focus();return}showStep(Math.min(3,step+1))}));document.querySelectorAll('.prev-btn').forEach(btn=>btn.addEventListener('click',()=>showStep(Math.max(1,step-1))));
 
-document.getElementById('assessmentForm').addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(e.currentTarget);const first=fd.get('firstName')||'',goal=fd.get('goal')||'',msg=`Hi Physiqo, I completed my free fitness assessment. My name is ${first} and my main goal is ${goal}. I would like to continue.`;document.getElementById('waContinue').href=`https://wa.me/919061755675?text=${encodeURIComponent(msg)}`;steps.forEach(s=>s.classList.remove('active'));document.querySelector('.form-progress').style.display='none';document.getElementById('formSuccess').classList.add('show')});
+const ASSESSMENT_WEBHOOK='https://nidhin281200.app.n8n.cloud/webhook-test/f13e3bf8-845c-4ded-9447-1fb24dcf2eb2';
+
+document.getElementById('assessmentForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const form=e.currentTarget;
+  const fd=new FormData(form);
+  const submitBtn=form.querySelector('button[type="submit"]');
+  const originalText=submitBtn.textContent;
+  submitBtn.disabled=true;
+  submitBtn.textContent='Sending...';
+
+  const payload={
+    firstName:fd.get('firstName')||'',
+    age:fd.get('age')||'',
+    height:fd.get('height')||'',
+    weight:fd.get('weight')||'',
+    location:fd.get('location')||'',
+    goal:fd.get('goal')||'',
+    training:fd.get('training')||'',
+    experience:fd.get('experience')||'',
+    challenge:fd.get('challenge')||'',
+    whatsapp:fd.get('whatsapp')||'',
+    email:fd.get('email')||'',
+    target:fd.get('target')||'',
+    source:'Physiqo Website - Free Fitness Assessment',
+    pageUrl:window.location.href,
+    submittedAt:new Date().toISOString()
+  };
+
+  try{
+    const response=await fetch(ASSESSMENT_WEBHOOK,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    if(!response.ok)throw new Error(`Webhook returned ${response.status}`);
+
+    const first=payload.firstName,goal=payload.goal;
+    const msg=`Hi Physiqo, I completed my free fitness assessment. My name is ${first} and my main goal is ${goal}. I would like to continue.`;
+    document.getElementById('waContinue').href=`https://wa.me/919061755675?text=${encodeURIComponent(msg)}`;
+    steps.forEach(s=>s.classList.remove('active'));
+    document.querySelector('.form-progress').style.display='none';
+    document.getElementById('formSuccess').classList.add('show');
+  }catch(error){
+    console.error('Assessment webhook error:',error);
+    alert('We could not send your assessment right now. Please try again.');
+  }finally{
+    submitBtn.disabled=false;
+    submitBtn.textContent=originalText;
+  }
+});
 
 const langBtn=document.getElementById('langToggle');let ar=false;langBtn.addEventListener('click',()=>{ar=!ar;document.documentElement.dir=ar?'rtl':'ltr';document.documentElement.lang=ar?'ar':'en';langBtn.textContent=ar?'English':'العربية';document.querySelector('.hero-copy .eyebrow').textContent=ar?'تدريب لياقة شخصي • قطر':'PERSONALISED FITNESS COACHING • QATAR';document.querySelector('.lead').textContent=ar?'تدريب وتغذية ومتابعة وقياس تقدم — مصممة حسب جسمك ونمط حياتك وهدفك.':'Training, nutrition, accountability and progress tracking — built around your body, lifestyle and goals.'});
