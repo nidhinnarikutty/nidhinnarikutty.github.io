@@ -8,7 +8,7 @@ document.getElementById('calBtn').addEventListener('click',()=>{const age=+docum
 
 let step=1;const steps=[...document.querySelectorAll('.form-step')],stepLabel=document.getElementById('stepLabel'),progressBar=document.getElementById('progressBar');function showStep(n){step=n;steps.forEach(s=>s.classList.toggle('active',+s.dataset.step===n));stepLabel.textContent=`Step ${n} of 3`;progressBar.style.width=`${n/3*100}%`}document.querySelectorAll('.next-btn').forEach(btn=>btn.addEventListener('click',()=>{const current=steps.find(s=>+s.dataset.step===step);const req=[...current.querySelectorAll('[required]')];if(req.some(i=>!i.value)){req.find(i=>!i.value)?.focus();return}showStep(Math.min(3,step+1))}));document.querySelectorAll('.prev-btn').forEach(btn=>btn.addEventListener('click',()=>showStep(Math.max(1,step-1))));
 
-const ASSESSMENT_WEBHOOK='https://nidhin281200.app.n8n.cloud/webhook-test/f13e3bf8-845c-4ded-9447-1fb24dcf2eb2';
+const ASSESSMENT_WEBHOOK='https://nidhin281200.app.n8n.cloud/webhook/f13e3bf8-845c-4ded-9447-1fb24dcf2eb2';
 
 document.getElementById('assessmentForm').addEventListener('submit',async e=>{
   e.preventDefault();
